@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import * as React from "react";
+import "./App.css";
+
+import { useSelector, dispatch } from "./store/app-store";
+import * as actions from "./store/actions";
+
+const AddCounterInput = () => {
+  const nextId =
+    useSelector((state) => Math.max(0, ...state.counters.keys())) + 1;
+  return (
+    <form
+      onSubmit={(event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        const name = data.get(`name`) as string;
+        dispatch(actions.newCounter({ name, id: nextId }));
+      }}
+    >
+      <legend>Anotha one</legend>
+      <label>
+        <span>Name:</span>
+        <input type="text" name="name" />
+      </label>
+      <input type="submit" />
+    </form>
+  );
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const counters = useSelector((state) =>
+    Array.from(state.counters).map(([id, counter]) => ({ id, ...counter })),
+  );
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      <header>
+        <h1>Redsux </h1>
+        <p>(minimal redux implementation without context)</p>
+      </header>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <AddCounterInput />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ul>
+        {counters.map((counter) => (
+          <li key={counter.id} className="counter">
+            <span>Counter: {counter.name}</span>
+            <span>Value: {counter.value}</span>
+            <button
+              onClick={() =>
+                dispatch(actions.add({ id: counter.id, amount: 1 }))
+              }
+            >
+              Incr
+            </button>
+            <button
+              onClick={() =>
+                dispatch(actions.sub({ id: counter.id, amount: 1 }))
+              }
+            >
+              Decr
+            </button>
+          </li>
+        ))}
+      </ul>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
